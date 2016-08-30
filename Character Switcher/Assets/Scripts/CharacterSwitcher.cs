@@ -21,10 +21,11 @@ public class CharacterSwitcher : MonoBehaviour
     }
     private CurrentCharacter currentCharacter = 0;
 
-    void FixedUpdate()
+    void Update()
     {
         SwitchUp();
         SwitchDown();
+        ActivatingScripts();
 
         //Sets camera position to a pre designated position and rotation using a tagged object
         mainCamera.transform.position = GameObject.FindGameObjectWithTag("Character" + ((int)currentCharacter + 1) + "Camera").transform.position;
