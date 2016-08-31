@@ -3,23 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class CharacterSwitcher : MonoBehaviour
-{
-    [System.Serializable]
-    public class CharacterToggleData
-    {
-        public List<MonoBehaviour> characterScripts;
-        public GameObject rootObject, cameraAttachPoint;
-
-        //Activates scripts attached to current character
-        public void SwitchTo(bool state)
-        {
-            for (int i = 0; i < characterScripts.Count; i++)
-            {
-                characterScripts[i].enabled = state;
-            }
-        }
-    }
-    
+{   
     //The main camera in the game
     public GameObject mainCamera;
 
@@ -28,6 +12,17 @@ public class CharacterSwitcher : MonoBehaviour
 
     //Index of currently selected character
     public int selectedCharacterIndex;
+
+    public float cameraPositionDisplacementPercentagePerSecond = 0.99f;
+    public float cameraRotationDisplacementPercentagePerSecond = 0.99f;
+
+    void Start()
+    {
+        for (int i = 0; i < characterDatas.Count; i++)
+        {
+            characterDatas[i].SwitchTo(i == selectedCharacterIndex);
+        }
+    }
 
     void Update()
     {
@@ -43,9 +38,15 @@ public class CharacterSwitcher : MonoBehaviour
         }
 
         //Moves camera to the camera attach point of the currently selected character
-        mainCamera.transform.position = characterDatas[selectedCharacterIndex].cameraAttachPoint.transform.position;
-        mainCamera.transform.rotation = characterDatas[selectedCharacterIndex].cameraAttachPoint.transform.rotation;
-
+        if (characterDatas[selectedCharacterIndex].cameraAttachPoint != null)
+        {
+            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, characterDatas[selectedCharacterIndex].cameraAttachPoint.transform.position, cameraPositionDisplacementPercentagePerSecond * Time.deltaTime);
+            mainCamera.transform.rotation = Quaternion.Slerp(mainCamera.transform.rotation, characterDatas[selectedCharacterIndex].cameraAttachPoint.transform.rotation, cameraRotationDisplacementPercentagePerSecond * Time.deltaTime);
+        }
+        else
+        {
+            Debug.Log("No camera attach point on game object!");
+        }
     }
 
     //Deactivates current object, moves by the offset in the array, and activates the new current object. Wraps arounds the ends of the array
